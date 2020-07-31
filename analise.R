@@ -125,3 +125,18 @@ ggplot(episodios_mes, aes(mes_nome, n)) +
         axis.text.x = element_text(face = "bold"),
         plot.title = element_text(size = 18, face = "bold")) +
   ggtitle("Frequência por Mês")
+
+# Frequência por mês e ano
+episodios_mes_ano <- episodios_dia %>%
+  count(ano_mes)
+
+ggplot(episodios_mes_ano, aes(ano_mes, n)) +
+  geom_col(fill = "#0097d6") +
+  coord_polar()  +
+  theme_minimal() +
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.text.x = element_text(face = "bold"),
+        plot.title = element_text(size = 18, face = "bold")) +
+  ggtitle("Frequência por Mês e Ano")
