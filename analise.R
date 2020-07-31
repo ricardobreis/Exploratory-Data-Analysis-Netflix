@@ -74,3 +74,23 @@ episodios_dia %>%
   theme_minimal() +
   ggtitle("Episódios Por Dia", "Histórico de 2017 à 2020") +
   labs(x = "Data", y = "Episódios") 
+
+# Heatmap do calendário
+
+episodios_dia <- episodios_dia %>% arrange(Date)
+episodios_dia$dia_semana_numero <- wday(episodios_dia$Date)
+episodios_dia$dia_semana_nome <- weekdays(episodios_dia$Date, abbreviate = T)
+episodios_dia$mes_nome <- months(episodios_dia$Date, abbreviate = T)
+episodios_dia$dia_semana_nome <- factor(episodios_dia$dia_semana_nome, levels = rev(c("dom", "seg","ter","qua","qui","sex","sáb")), labels = rev(c("Dom","Seg","Ter","Qua","Qui","Sex","Sáb")))
+episodios_dia$mes_nome <- factor(month(episodios_dia$Date),levels = as.character(1:12), labels = c("Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julio","Agosto","Setembro","Outubro","Novembro","Dezembro"))
+episodios_dia$ano_mes <- factor(as.yearmon(episodios_dia$Date)) 
+episodios_dia$semana <- as.numeric(format(episodios_dia$Date,"%W"))
+episodios_dia$semana_mes <- ceiling(day(episodios_dia$Date) / 7)
+
+ggplot(episodios_dia, aes(semana_mes, dia_semana_nome, fill = episodios_dia$n)) + 
+  geom_tile(colour = "white") + 
+  facet_grid(year(episodios_dia$Date) ~ mes_nome) + 
+  scale_fill_gradient(low = "#FFD000", high = "#FF1919") + 
+  ggtitle("Episódios por Dia", "Heatmap") +
+  labs(x = "Semana", y = "Dia") +
+  labs(fill = "Nº de Episódios")
