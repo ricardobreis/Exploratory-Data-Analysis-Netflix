@@ -76,7 +76,6 @@ episodios_dia %>%
   labs(x = "Data", y = "Episódios") 
 
 # Heatmap do calendário
-
 episodios_dia <- episodios_dia %>% arrange(Date)
 episodios_dia$dia_semana_numero <- wday(episodios_dia$Date)
 episodios_dia$dia_semana_nome <- weekdays(episodios_dia$Date, abbreviate = T)
@@ -96,12 +95,11 @@ ggplot(episodios_dia, aes(semana_mes, dia_semana_nome, fill = episodios_dia$n)) 
   labs(fill = "Nº de Episódios")
 
 # Frequência por dia da semana
-
 episodio_dia_semana <- episodios_dia %>%
   count(dia_semana_nome)
 
 ggplot(episodio_dia_semana, aes(dia_semana_nome, n)) +
-  geom_col(fill = "#5b59d6") +
+  geom_col(fill = "#0097d6") +
   coord_polar() +
   theme_minimal() +
   theme(axis.title.x = element_blank(),
@@ -111,3 +109,19 @@ ggplot(episodio_dia_semana, aes(dia_semana_nome, n)) +
         plot.title = element_text(size = 16, face = "bold")) +
   ggtitle("Frequência por Dia da Semana")
 
+
+# Frequência por mês
+episodios_mes <- episodios_dia %>%
+  count(mes_nome)
+
+
+ggplot(episodios_mes, aes(mes_nome, n)) +
+  geom_col(fill = "#0097d6") +
+  coord_polar()  +
+  theme_minimal() +
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.text.x = element_text(face = "bold"),
+        plot.title = element_text(size = 18, face = "bold")) +
+  ggtitle("Frequência por Mês")
