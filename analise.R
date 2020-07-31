@@ -94,3 +94,20 @@ ggplot(episodios_dia, aes(semana_mes, dia_semana_nome, fill = episodios_dia$n)) 
   ggtitle("Episódios por Dia", "Heatmap") +
   labs(x = "Semana", y = "Dia") +
   labs(fill = "Nº de Episódios")
+
+# Frequência por dia da semana
+
+episodio_dia_semana <- episodios_dia %>%
+  count(dia_semana_nome)
+
+ggplot(episodio_dia_semana, aes(dia_semana_nome, n)) +
+  geom_col(fill = "#5b59d6") +
+  coord_polar() +
+  theme_minimal() +
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.text.x = element_text(face = "bold"),
+        plot.title = element_text(size = 16, face = "bold")) +
+  ggtitle("Frequência por Dia da Semana")
+
