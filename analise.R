@@ -39,15 +39,18 @@ summary(historico)
 historico$Date <- dmy(historico$Date)
 
 # Separando titulo em titulo, temporada e episodio
-historico_serie <- historico %>%
+historico <- historico %>%
   separate(col = Title, into = c("titulo", "temporada", "titulo_episodio"), sep = ': ')
 
 # Filtrando o que for serie
 historico_serie <- subset(historico_serie, !is.na(historico_serie$temporada))
 historico_serie <- subset(historico_serie, !is.na(historico_serie$titulo_episodio))
 
+# Filtrando o que for filme
+historico_filme <- subset(historico, is.na(historico$titulo_episodio))
 
-# Análise -----------------------------------------------------------------
+
+# Análise de Séries -------------------------------------------------------
 
 # Séries maratonadas
 maratona <- historico_serie %>%
@@ -138,7 +141,6 @@ ggplot(episodio_dia_semana, aes(dia_semana_nome, n)) +
     title = "Frequência por Dia da Semana"
   )
 
-
 # Frequência por mês
 episodios_mes <- episodios_dia %>%
   count(mes_nome)
@@ -185,3 +187,63 @@ wordcloud2(
   size = 0.7, 
   shape = 'pentagon'
 )
+
+
+# Análise de Filmes -------------------------------------------------------
+
+historico_filme$dia_semana_nome <- weekdays(historico_filme$Date, abbreviate = T)
+historico_filme$mes_nome <- months(historico_filme$Date, abbreviate = T)
+historico_filme$ano <- year(historico_filme$Date)
+
+# Frequência por dia da semana
+filme_dia_semana <- historico_filme %>%
+  count(dia_semana_nome)
+
+ggplot(filme_dia_semana, aes(dia_semana_nome, n)) +
+  geom_col(fill = "#0097d6") +
+  coord_polar() +
+  theme_minimal() +
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.text.x = element_text(face = "bold"),
+        plot.title = element_text(size = 16, face = "bold")) +
+  labs(
+    title = "Frequência por Dia da Semana"
+  )
+
+# Frequência por mês
+filme_mes <- historico_filme %>%
+  count(mes_nome)
+
+
+ggplot(filme_mes, aes(mes_nome, n)) +
+  geom_col(fill = "#0097d6") +
+  coord_polar()  +
+  theme_minimal() +
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.text.x = element_text(face = "bold"),
+        plot.title = element_text(size = 18, face = "bold")) +
+  labs(
+    title = "Frequência por Mês"
+  )
+
+# Frequência por ano
+filme_ano <- historico_filme %>%
+  count(ano)
+
+
+ggplot(filme_ano, aes(ano, n)) +
+  geom_col(fill = "#0097d6") +
+  coord_polar()  +
+  theme_minimal() +
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.text.x = element_text(face = "bold"),
+        plot.title = element_text(size = 18, face = "bold")) +
+  labs(
+    title = "Frequência por Ano"
+  )
