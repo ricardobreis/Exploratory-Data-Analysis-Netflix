@@ -16,6 +16,9 @@ library(tidyr)
 library(lubridate)
 library(zoo)
 library(ggplot2)
+library(plotly)
+library(wordcloud2)
+library(forcats)
 
 # Limpando o console.
 cat("\014") 
@@ -27,13 +30,13 @@ rm(list = ls())
 
 historico <- read.csv("~/R-Projetos/Netflix/NetflixViewingHistory.csv", encoding="UTF-8")
 glimpse(historico)
-historico$Date <- dmy(historico$Date)
-
 head(historico)
 summary(historico)
 
 
 # Tidying  ----------------------------------------------------------------
+
+historico$Date <- dmy(historico$Date)
 
 # Separando titulo em titulo, temporada e episodio
 historico_serie <- historico %>%
@@ -59,21 +62,26 @@ maratona %>%
   ggplot(aes(x = reorder(titulo, n), y = n)) +
   geom_col(fill = "#0097d6") +
   coord_flip() +
-  ggtitle("Top 10 de Séries Maratonadas no Netflix", "Séries Com 6 ou Mais Episódios Vistos Por Dia") +
-  labs(x = "Séries", y = "Episódios") +
-  theme_minimal()
+  labs(
+    title = "Top 10 de Séries Maratonadas no Netflix",
+    subtitle = "Séries Com 6 ou Mais Episódios Vistos Por Dia",
+    x = "Séries",
+    y = "Episódios"
+  )
 
 # Episódios por dia
 episodios_dia <- historico_serie %>%
   count(Date) %>%
   arrange(desc(n))
 
-episodios_dia %>%
-  ggplot(aes(x = Date, y = n)) +
+ggplot(episodios_dia, aes(x = Date, y = n)) +
   geom_col(color = c("#0097d6")) +
-  theme_minimal() +
-  ggtitle("Episódios Por Dia", "Histórico de 2017 à 2020") +
-  labs(x = "Data", y = "Episódios") 
+  labs(
+    title = "Episódios Por Dia",
+    subtitle = "Histórico de 2017 à 2020",
+    x = "Data",
+    y = "Episódios"
+  )
 
 # Heatmap do calendário
 episodios_dia <- episodios_dia %>% arrange(Date)
@@ -90,9 +98,13 @@ ggplot(episodios_dia, aes(semana_mes, dia_semana_nome, fill = episodios_dia$n)) 
   geom_tile(colour = "white") + 
   facet_grid(year(episodios_dia$Date) ~ mes_nome) + 
   scale_fill_gradient(low = "#FFD000", high = "#FF1919") + 
-  ggtitle("Episódios por Dia", "Heatmap") +
-  labs(x = "Semana", y = "Dia") +
-  labs(fill = "Nº de Episódios")
+  labs(
+    title = "Episódios por Dia", 
+    subtitle = "Heatmap",
+    x = "Semana",
+    y = "Dia",
+    fill = "Nº de Episódios"
+  )
 
 # Frequência por dia da semana
 episodio_dia_semana <- episodios_dia %>%
@@ -107,7 +119,9 @@ ggplot(episodio_dia_semana, aes(dia_semana_nome, n)) +
         axis.text.y = element_blank(),
         axis.text.x = element_text(face = "bold"),
         plot.title = element_text(size = 16, face = "bold")) +
-  ggtitle("Frequência por Dia da Semana")
+  labs(
+    title = "Frequência por Dia da Semana"
+  )
 
 
 # Frequência por mês
@@ -124,7 +138,9 @@ ggplot(episodios_mes, aes(mes_nome, n)) +
         axis.text.y = element_blank(),
         axis.text.x = element_text(face = "bold"),
         plot.title = element_text(size = 18, face = "bold")) +
-  ggtitle("Frequência por Mês")
+  labs(
+    title = "Frequência por Mês"
+  )
 
 # Frequência por mês e ano
 episodios_mes_ano <- episodios_dia %>%
@@ -139,4 +155,19 @@ ggplot(episodios_mes_ano, aes(ano_mes, n)) +
         axis.text.y = element_blank(),
         axis.text.x = element_text(face = "bold"),
         plot.title = element_text(size = 18, face = "bold")) +
-  ggtitle("Frequência por Mês e Ano")
+  labs(
+    title = "Frequência por Mês e Ano"
+  )
+
+# Worldcloud de séries
+contagem_nuvem <- historico_serie %>%
+  count(titulo) %>%
+  arrange(desc(n)) %>%
+  top_n(50, n)
+
+wordcloud2(
+  data = contagem_nuvem, 
+  size = 0.7, 
+  shape = 'pentagon'
+)
+
