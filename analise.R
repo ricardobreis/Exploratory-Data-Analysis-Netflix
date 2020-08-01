@@ -55,11 +55,10 @@ maratona <- historico_serie %>%
   subset(n >= 6) %>%
   group_by(titulo) %>% 
   summarise(n = sum(n)) %>%
-  arrange(desc(n))
-
-maratona %>% 
-  top_n(10) %>%
-  ggplot(aes(x = reorder(titulo, n), y = n)) +
+  arrange(desc(n)) %>% 
+  top_n(10)
+  
+ggplot(maratona, aes(x = reorder(titulo, n), y = n)) +
   geom_col(fill = "#0097d6") +
   coord_flip() +
   labs(
@@ -82,6 +81,22 @@ ggplot(episodios_dia, aes(x = Date, y = n)) +
     x = "Data",
     y = "Episódios"
   )
+
+# Séries escolhidas por dia
+series_escolhidas <- historico_serie %>%
+  filter(titulo == "Vikings" | titulo == "Narcos" | titulo == "Stranger Things" | titulo == "The Crown") %>%
+  group_by(titulo,Date) %>%
+  count()
+
+ggplot(series_escolhidas, aes(x = Date, y = n, fill = titulo)) +
+  geom_col() +
+  labs(
+    title = "Séries Escolhidas Por Dia",
+    subtitle = "Vikings, Narcos, Stranger Things e The Crown",
+    x = "Data",
+    y = "Episódios"
+  )
+
 
 # Heatmap do calendário
 episodios_dia <- episodios_dia %>% arrange(Date)
@@ -170,4 +185,3 @@ wordcloud2(
   size = 0.7, 
   shape = 'pentagon'
 )
-
