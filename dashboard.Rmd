@@ -1,5 +1,5 @@
 ---
-title: "Netflix Dashboard"
+title: "Netflix Monitor"
 output: 
   flexdashboard::flex_dashboard:
     orientation: rows
@@ -41,15 +41,53 @@ episodios_dia$dia_semana_numero <- wday(episodios_dia$Date)
 episodios_dia$dia_semana_nome <- weekdays(episodios_dia$Date, abbreviate = T)
 episodios_dia$mes_nome <- months(episodios_dia$Date, abbreviate = T)
 episodios_dia$dia_semana_nome <- factor(episodios_dia$dia_semana_nome, levels = rev(c("dom", "seg","ter","qua","qui","sex","sáb")), labels = rev(c("Dom","Seg","Ter","Qua","Qui","Sex","Sáb")))
-episodios_dia$mes_nome <- factor(month(episodios_dia$Date),levels = as.character(1:12), labels = c("Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julio","Agosto","Setembro","Outubro","Novembro","Dezembro"))
+episodios_dia$mes_nome <- factor(month(episodios_dia$Date),levels = as.character(1:12), labels = c("Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"))
 episodios_dia$ano_mes <- factor(as.yearmon(episodios_dia$Date)) 
 episodios_dia$semana <- as.numeric(format(episodios_dia$Date,"%W"))
 episodios_dia$semana_mes <- ceiling(day(episodios_dia$Date) / 7)
 
 ```
 
+Row {data-height=130}
+-----------------------------------------------------------------------
 
-Row 
+### Séries
+
+```{r}
+total_series <- length(unique(historico_serie$titulo))
+
+valueBox(
+  total_series,
+  icon = 'fa-chart-line'
+)
+
+```
+
+### Episódios
+
+```{r}
+total_eps <- length(historico_serie$titulo)
+
+valueBox(
+  total_eps,
+  icon = 'fa-television'
+)
+
+```
+
+### Dias
+
+```{r}
+total_dias <- length(unique(historico_serie$Date))
+
+valueBox(
+  total_dias,
+  icon = 'fa-calendar'
+)
+
+```
+
+Row {data-height=300}
 -----------------------------------------------------------------------
 
 ### Frequência por Dia da Semana
@@ -66,8 +104,7 @@ ggplot(episodio_dia_semana, aes(dia_semana_nome, n)) +
   theme(axis.title.x = element_blank(),
         axis.title.y = element_blank(),
         axis.text.y = element_blank(),
-        axis.text.x = element_text(face = "bold"),
-        plot.title = element_text(size = 16, face = "bold"))
+        axis.text.x = element_text(size = 15))
 ```
 
 ### Frequência por Mês
@@ -85,9 +122,9 @@ ggplot(episodios_mes, aes(mes_nome, n)) +
   theme(axis.title.x = element_blank(),
         axis.title.y = element_blank(),
         axis.text.y = element_blank(),
-        axis.text.x = element_text(face = "bold"),
-        plot.title = element_text(size = 18, face = "bold")) 
+        axis.text.x = element_text(size = 15)) 
 ```
+
 
 ### Worldcloud de Séries Mais Vistas
 
@@ -105,7 +142,7 @@ wordcloud2(
 )
 ```
 
-Row 
+Row {data-height=300}
 -----------------------------------------------------------------------
 
 ### Heatmap
@@ -120,5 +157,7 @@ ggplot(episodios_dia, aes(semana_mes, dia_semana_nome, fill = episodios_dia$n)) 
     x = "Semana",
     y = "Dia",
     fill = "Nº de Episódios"
-  )
+  ) +
+  theme(axis.text.y = element_text(size = 13),
+        axis.text.x = element_text(size = 13)) 
 ```
