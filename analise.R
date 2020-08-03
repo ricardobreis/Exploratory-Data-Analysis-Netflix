@@ -43,8 +43,8 @@ historico <- historico %>%
   separate(col = Title, into = c("titulo", "temporada", "titulo_episodio"), sep = ': ')
 
 # Filtrando o que for serie
-historico_serie <- subset(historico_serie, !is.na(historico_serie$temporada))
-historico_serie <- subset(historico_serie, !is.na(historico_serie$titulo_episodio))
+historico_serie <- subset(historico, !is.na(historico$temporada))
+historico_serie <- subset(historico, !is.na(historico$titulo_episodio))
 
 # Filtrando o que for filme
 historico_filme <- subset(historico, is.na(historico$titulo_episodio))
