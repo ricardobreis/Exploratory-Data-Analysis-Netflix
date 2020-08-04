@@ -16,6 +16,7 @@ library(ggplot2)
 library(plotly)
 library(wordcloud2)
 library(forcats)
+library(knitr)
 
 historico <- read.csv("~/R-Projetos/Netflix/NetflixViewingHistory.csv", encoding="UTF-8")
 
@@ -46,7 +47,17 @@ episodios_dia$ano_mes <- factor(as.yearmon(episodios_dia$Date))
 episodios_dia$semana <- as.numeric(format(episodios_dia$Date,"%W"))
 episodios_dia$semana_mes <- ceiling(day(episodios_dia$Date) / 7)
 
+# Filtrando o que for filme
+historico_filme <- subset(historico, is.na(historico$titulo_episodio))
+
+historico_filme$dia_semana_nome <- weekdays(historico_filme$Date, abbreviate = T)
+historico_filme$mes_nome <- months(historico_filme$Date, abbreviate = T)
+historico_filme$ano <- year(historico_filme$Date)
+
 ```
+
+Séries
+=======================================================================
 
 Row {data-height=130}
 -----------------------------------------------------------------------
@@ -161,3 +172,79 @@ ggplot(episodios_dia, aes(semana_mes, dia_semana_nome, fill = episodios_dia$n)) 
   theme(axis.text.y = element_text(size = 13),
         axis.text.x = element_text(size = 13)) 
 ```
+
+Filmes {data-orientation=columns}
+=======================================================================
+
+Column 
+-----------------------------------------------------------------------
+
+### Filmes
+
+```{r}
+total_filmes <- length(unique(historico_filme$titulo))
+
+valueBox(
+  total_filmes,
+  icon = 'fa-chart-line'
+)
+
+```
+
+### Tabela de Filmes
+
+```{r}
+
+kable(select(historico_filme, titulo, mes_nome), row.names = FALSE, col.names = c("Título", "Mês"))
+
+```
+
+
+Column 
+-----------------------------------------------------------------------
+
+### Dias
+
+```{r}
+total_dias <- length(unique(historico_filme$Date))
+
+valueBox(
+  total_dias,
+  icon = 'fa-calendar'
+)
+
+```
+
+### Frequência por Dia da Semana
+
+```{r}
+filme_dia_semana <- historico_filme %>%
+  count(dia_semana_nome)
+
+ggplot(filme_dia_semana, aes(dia_semana_nome, n)) +
+  geom_col(fill = "#0097d6") +
+  coord_polar() +
+  theme_minimal() +
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.text.x = element_text(size = 15)) 
+```
+
+### Frequência por Mês
+
+```{r}
+filme_mes <- historico_filme %>%
+  count(mes_nome)
+
+
+ggplot(filme_mes, aes(mes_nome, n)) +
+  geom_col(fill = "#0097d6") +
+  coord_polar()  +
+  theme_minimal() +
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.text.x = element_text(size = 15)) 
+```
+
