@@ -103,7 +103,7 @@ historico_filme_df <- reactive({
 Séries {data-icon="fa-television"}
 =======================================================================
 
-Row {data-height=130}
+Row 
 -----------------------------------------------------------------------
 
 ### Séries
@@ -195,27 +195,6 @@ renderPlot({
 
 ```
 
-
-### Worldcloud de Séries Mais Vistas
-
-```{r}
-
-renderPlot({
-  contagem_nuvem <- historico_serie_df() %>%
-    count(titulo) %>%
-    arrange(desc(n)) %>%
-    top_n(100, n)
-  
-  wordcloud(
-    word = contagem_nuvem$titulo, 
-    freq = contagem_nuvem$n,
-    max.words = 100,
-    colors=brewer.pal(8, "Dark2")
-  )
-})
-
-```
-
 Row {data-height=300}
 -----------------------------------------------------------------------
 
@@ -238,6 +217,30 @@ renderPlot({
 })
 
 ```
+
+Row 
+-----------------------------------------------------------------------
+
+### Worldcloud de Séries Mais Vistas
+
+```{r, fig.width = 10,fig.height = 6}
+
+renderPlot({
+  contagem_nuvem <- historico_serie_df() %>%
+    count(titulo) %>%
+    arrange(desc(n)) %>%
+    top_n(100, n)
+  
+  wordcloud(
+    word = contagem_nuvem$titulo, 
+    freq = contagem_nuvem$n,
+    max.words = 100,
+    colors=brewer.pal(8, "Dark2")
+  )
+})
+
+```
+
 
 Filmes {data-icon="fa-film"}
 =======================================================================
