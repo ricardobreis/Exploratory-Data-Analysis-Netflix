@@ -4,6 +4,10 @@ output:
   flexdashboard::flex_dashboard:
     orientation: rows
     vertical_layout: scroll
+    theme: cosmo
+    navbar:
+      - { title: "Source Code", href: "https://github.com/ricardobreis/Exploratory-Data-Analysis-Netflix", align: right, icon: "fa-github" }
+runtime: shiny
 ---
 
 ```{r setup, include=FALSE}
@@ -14,7 +18,7 @@ library(lubridate)
 library(zoo)
 library(ggplot2)
 library(plotly)
-library(wordcloud2)
+library(wordcloud)
 library(forcats)
 library(knitr)
 
@@ -23,7 +27,7 @@ historico <- read.csv("~/R-Projetos/Netflix/NetflixViewingHistory.csv", encoding
 historico$Date <- dmy(historico$Date)
 
 historico <- historico %>%
-  filter(year(Date) == 2019)
+  filter(year(Date) %in% c(2018, 2019))
 
 # Separando titulo em titulo, temporada e episodio
 historico <- historico %>%
@@ -33,10 +37,13 @@ historico <- historico %>%
 historico_serie <- subset(historico, !is.na(historico$temporada))
 historico_serie <- subset(historico, !is.na(historico$titulo_episodio))
 
+historico_serie$ano <- year(historico_serie$Date)
+
 episodios_dia <- historico_serie %>%
   count(Date) %>%
   arrange(desc(n))
 
+episodios_dia$ano <- year(episodios_dia$Date)
 episodios_dia <- episodios_dia %>% arrange(Date)
 episodios_dia$dia_semana_numero <- wday(episodios_dia$Date)
 episodios_dia$dia_semana_nome <- weekdays(episodios_dia$Date, abbreviate = T)
@@ -56,7 +63,44 @@ historico_filme$ano <- year(historico_filme$Date)
 
 ```
 
-Séries
+Sidebar {data-width=200 .sidebar}
+=======================================================================
+
+```{r}
+sliderInput("ano_slider", 
+            label = "Selecione o Ano:",
+            min = 2018, 
+            max = 2019, 
+            value = c(2018,2019), 
+            step = 1)
+
+historico_serie_df <- reactive({
+
+  historico_serie %>%
+    filter(ano >= input$ano_slider[1] &
+             ano <= input$ano_slider[2])
+
+})
+
+episodios_dia_df <- reactive({
+
+  episodios_dia %>%
+    filter(ano >= input$ano_slider[1] &
+             ano <= input$ano_slider[2])
+
+})
+
+historico_filme_df <- reactive({
+
+  historico_filme %>%
+    filter(ano >= input$ano_slider[1] &
+             ano <= input$ano_slider[2])
+
+})
+
+```
+
+Séries {data-icon="fa-television"}
 =======================================================================
 
 Row {data-height=130}
@@ -65,36 +109,46 @@ Row {data-height=130}
 ### Séries
 
 ```{r}
-total_series <- length(unique(historico_serie$titulo))
 
-valueBox(
-  total_series,
-  icon = 'fa-chart-line'
-)
+renderValueBox({
+
+  total_series <- length(unique(historico_serie_df()$titulo))
+  
+  valueBox(
+    total_series,
+    icon = 'fa-chart-line'
+  )
+})
 
 ```
 
 ### Episódios
 
 ```{r}
-total_eps <- length(historico_serie$titulo)
 
-valueBox(
-  total_eps,
-  icon = 'fa-television'
-)
+renderValueBox({
+  total_eps <- length(historico_serie_df()$titulo)
+  
+  valueBox(
+    total_eps,
+    icon = 'fa-television'
+  )
+})
 
 ```
 
 ### Dias
 
 ```{r}
-total_dias <- length(unique(historico_serie$Date))
 
-valueBox(
-  total_dias,
-  icon = 'fa-calendar'
-)
+renderValueBox({
+  total_dias <- length(unique(historico_serie_df()$Date))
+  
+  valueBox(
+    total_dias,
+    icon = 'fa-calendar'
+  )
+})
 
 ```
 
@@ -105,35 +159,40 @@ Row {data-height=300}
 
 ```{r}
 
-episodio_dia_semana <- episodios_dia %>%
-  count(dia_semana_nome)
-
-ggplot(episodio_dia_semana, aes(dia_semana_nome, n)) +
-  geom_col(fill = "#0097d6") +
-  coord_polar() +
-  theme_minimal() +
-  theme(axis.title.x = element_blank(),
-        axis.title.y = element_blank(),
-        axis.text.y = element_blank(),
-        axis.text.x = element_text(size = 15))
+renderPlot({
+  episodio_dia_semana <- episodios_dia_df() %>%
+    count(dia_semana_nome)
+  
+  ggplot(episodio_dia_semana, aes(dia_semana_nome, n)) +
+    geom_col(fill = "#0097d6") +
+    coord_polar() +
+    theme_minimal() +
+    theme(axis.title.x = element_blank(),
+          axis.title.y = element_blank(),
+          axis.text.y = element_blank(),
+          axis.text.x = element_text(size = 15))
+})
 ```
 
 ### Frequência por Mês
 
 ```{r}
 
-episodios_mes <- episodios_dia %>%
-  count(mes_nome)
+renderPlot({
+  episodios_mes <- episodios_dia_df() %>%
+    count(mes_nome)
+  
+  
+  ggplot(episodios_mes, aes(mes_nome, n)) +
+    geom_col(fill = "#0097d6") +
+    coord_polar()  +
+    theme_minimal() +
+    theme(axis.title.x = element_blank(),
+          axis.title.y = element_blank(),
+          axis.text.y = element_blank(),
+          axis.text.x = element_text(size = 15)) 
+})
 
-
-ggplot(episodios_mes, aes(mes_nome, n)) +
-  geom_col(fill = "#0097d6") +
-  coord_polar()  +
-  theme_minimal() +
-  theme(axis.title.x = element_blank(),
-        axis.title.y = element_blank(),
-        axis.text.y = element_blank(),
-        axis.text.x = element_text(size = 15)) 
 ```
 
 
@@ -141,16 +200,20 @@ ggplot(episodios_mes, aes(mes_nome, n)) +
 
 ```{r}
 
-contagem_nuvem <- historico_serie %>%
-  count(titulo) %>%
-  arrange(desc(n)) %>%
-  top_n(100, n)
+renderPlot({
+  contagem_nuvem <- historico_serie_df() %>%
+    count(titulo) %>%
+    arrange(desc(n)) %>%
+    top_n(100, n)
+  
+  wordcloud(
+    word = contagem_nuvem$titulo, 
+    freq = contagem_nuvem$n,
+    max.words = 100,
+    colors=brewer.pal(8, "Dark2")
+  )
+})
 
-wordcloud2(
-  data = contagem_nuvem, 
-  size = 0.7, 
-  shape = 'pentagon'
-)
 ```
 
 Row {data-height=300}
@@ -158,93 +221,100 @@ Row {data-height=300}
 
 ### Heatmap
 
-```{r, fig.width = 15,fig.height = 3}
+```{r, fig.width = 15,fig.height = 4}
 
-ggplot(episodios_dia, aes(semana_mes, dia_semana_nome, fill = episodios_dia$n)) + 
-  geom_tile(colour = "white") + 
-  facet_grid(year(episodios_dia$Date) ~ mes_nome) + 
-  scale_fill_gradient(low = "#FFD000", high = "#FF1919") + 
-  labs(
-    x = "Semana",
-    y = "Dia",
-    fill = "Nº de Episódios"
-  ) +
-  theme(axis.text.y = element_text(size = 13),
-        axis.text.x = element_text(size = 13)) 
+renderPlot({
+  ggplot(episodios_dia_df(), aes(semana_mes, dia_semana_nome, fill = n)) + 
+    geom_tile(colour = "white") + 
+    facet_grid(year(Date) ~ mes_nome) + 
+    scale_fill_gradient(low = "#FFD000", high = "#FF1919") + 
+    labs(
+      x = "Semana",
+      y = "Dia",
+      fill = "Nº de Episódios"
+    ) +
+    theme(axis.text.y = element_text(size = 13),
+          axis.text.x = element_text(size = 13)) 
+})
+
 ```
 
-Filmes {data-orientation=columns}
+Filmes {data-icon="fa-film"}
 =======================================================================
 
-Column 
+Row 
 -----------------------------------------------------------------------
 
 ### Filmes
 
 ```{r}
-total_filmes <- length(unique(historico_filme$titulo))
 
-valueBox(
-  total_filmes,
-  icon = 'fa-chart-line'
-)
-
-```
-
-### Tabela de Filmes
-
-```{r}
-
-kable(select(historico_filme, titulo, mes_nome), row.names = FALSE, col.names = c("Título", "Mês"))
+renderValueBox({
+  total_filmes <- length(unique(historico_filme_df()$titulo))
+  
+  valueBox(
+    total_filmes,
+    icon = 'fa-chart-line'
+  )
+})
 
 ```
-
-
-Column 
------------------------------------------------------------------------
 
 ### Dias
 
 ```{r}
-total_dias <- length(unique(historico_filme$Date))
 
-valueBox(
-  total_dias,
-  icon = 'fa-calendar'
-)
+renderValueBox({
+  total_dias <- length(unique(historico_filme_df()$Date))
+  
+  valueBox(
+    total_dias,
+    icon = 'fa-calendar'
+  )
+})
 
 ```
+
+Row 
+-----------------------------------------------------------------------
 
 ### Frequência por Dia da Semana
 
 ```{r}
-filme_dia_semana <- historico_filme %>%
-  count(dia_semana_nome)
 
-ggplot(filme_dia_semana, aes(dia_semana_nome, n)) +
-  geom_col(fill = "#0097d6") +
-  coord_polar() +
-  theme_minimal() +
-  theme(axis.title.x = element_blank(),
-        axis.title.y = element_blank(),
-        axis.text.y = element_blank(),
-        axis.text.x = element_text(size = 15)) 
+renderPlot({
+  filme_dia_semana <- historico_filme_df() %>%
+    count(dia_semana_nome)
+  
+  ggplot(filme_dia_semana, aes(dia_semana_nome, n)) +
+    geom_col(fill = "#0097d6") +
+    coord_polar() +
+    theme_minimal() +
+    theme(axis.title.x = element_blank(),
+          axis.title.y = element_blank(),
+          axis.text.y = element_blank(),
+          axis.text.x = element_text(size = 15)) 
+})
+  
 ```
 
 ### Frequência por Mês
 
 ```{r}
-filme_mes <- historico_filme %>%
-  count(mes_nome)
 
-
-ggplot(filme_mes, aes(mes_nome, n)) +
-  geom_col(fill = "#0097d6") +
-  coord_polar()  +
-  theme_minimal() +
-  theme(axis.title.x = element_blank(),
-        axis.title.y = element_blank(),
-        axis.text.y = element_blank(),
-        axis.text.x = element_text(size = 15)) 
+renderPlot({
+  filme_mes <- historico_filme_df() %>%
+    count(mes_nome)
+  
+  
+  ggplot(filme_mes, aes(mes_nome, n)) +
+    geom_col(fill = "#0097d6") +
+    coord_polar()  +
+    theme_minimal() +
+    theme(axis.title.x = element_blank(),
+          axis.title.y = element_blank(),
+          axis.text.y = element_blank(),
+          axis.text.x = element_text(size = 15)) 
+})
+  
 ```
-
