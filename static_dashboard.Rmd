@@ -1,0 +1,216 @@
+---
+title: "Netflix Monitor"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    vertical_layout: scroll
+    theme: cosmo
+    navbar:
+      - { title: "Source Code", href: "https://github.com/ricardobreis/Exploratory-Data-Analysis-Netflix", align: right, icon: "fa-github" }
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(dplyr)
+library(tidyr)
+library(lubridate)
+library(zoo)
+library(ggplot2)
+library(plotly)
+library(wordcloud2)
+library(forcats)
+library(knitr)
+
+historico <- read.csv("~/R-Projetos/Netflix/NetflixViewingHistory.csv", encoding="UTF-8")
+historico$Date <- dmy(historico$Date)
+historico <- historico %>%
+  filter(year(Date) %in% c(2018, 2019))
+# Separando titulo em titulo, temporada e episodio
+historico <- historico %>%
+  separate(col = Title, into = c("titulo", "temporada", "titulo_episodio"), sep = ': ')
+# Filtrando o que for serie
+historico_serie <- subset(historico, !is.na(historico$temporada))
+historico_serie <- subset(historico, !is.na(historico$titulo_episodio))
+episodios_dia <- historico_serie %>%
+  count(Date) %>%
+  arrange(desc(n))
+episodios_dia <- episodios_dia %>% arrange(Date)
+episodios_dia$dia_semana_numero <- wday(episodios_dia$Date)
+episodios_dia$dia_semana_nome <- weekdays(episodios_dia$Date, abbreviate = T)
+episodios_dia$mes_nome <- months(episodios_dia$Date, abbreviate = T)
+episodios_dia$dia_semana_nome <- factor(episodios_dia$dia_semana_nome, levels = rev(c("dom", "seg","ter","qua","qui","sex","sáb")), labels = rev(c("Dom","Seg","Ter","Qua","Qui","Sex","Sáb")))
+episodios_dia$mes_nome <- factor(month(episodios_dia$Date),levels = as.character(1:12), labels = c("Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"))
+episodios_dia$ano_mes <- factor(as.yearmon(episodios_dia$Date)) 
+episodios_dia$semana <- as.numeric(format(episodios_dia$Date,"%W"))
+episodios_dia$semana_mes <- ceiling(day(episodios_dia$Date) / 7)
+# Filtrando o que for filme
+historico_filme <- subset(historico, is.na(historico$titulo_episodio))
+historico_filme$dia_semana_nome <- weekdays(historico_filme$Date, abbreviate = T)
+historico_filme$mes_nome <- months(historico_filme$Date, abbreviate = T)
+historico_filme$ano <- year(historico_filme$Date)
+```
+
+Séries {data-icon="fa-television"}
+=======================================================================
+
+Row {data-height=130}
+-----------------------------------------------------------------------
+
+### Séries
+
+```{r}
+total_series <- length(unique(historico_serie$titulo))
+valueBox(
+  total_series,
+  icon = 'fa-chart-line'
+)
+```
+
+### Episódios
+
+```{r}
+total_eps <- length(historico_serie$titulo)
+valueBox(
+  total_eps,
+  icon = 'fa-television'
+)
+```
+
+### Dias
+
+```{r}
+total_dias <- length(unique(historico_serie$Date))
+valueBox(
+  total_dias,
+  icon = 'fa-calendar'
+)
+```
+
+Row {data-height=300}
+-----------------------------------------------------------------------
+
+### Frequência por Dia da Semana
+
+```{r}
+episodio_dia_semana <- episodios_dia %>%
+  count(dia_semana_nome)
+ggplot(episodio_dia_semana, aes(dia_semana_nome, n)) +
+  geom_col(fill = "#0097d6") +
+  coord_polar() +
+  theme_minimal() +
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.text.x = element_text(size = 15))
+```
+
+### Frequência por Mês
+
+```{r}
+episodios_mes <- episodios_dia %>%
+  count(mes_nome)
+ggplot(episodios_mes, aes(mes_nome, n)) +
+  geom_col(fill = "#0097d6") +
+  coord_polar()  +
+  theme_minimal() +
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.text.x = element_text(size = 15)) 
+```
+
+Row {data-height=400}
+-----------------------------------------------------------------------
+
+### Heatmap
+
+```{r, fig.width = 15,fig.height = 4}
+ggplot(episodios_dia, aes(semana_mes, dia_semana_nome, fill = episodios_dia$n)) + 
+  geom_tile(colour = "white") + 
+  facet_grid(year(episodios_dia$Date) ~ mes_nome) + 
+  scale_fill_gradient(low = "#FFD000", high = "#FF1919") + 
+  labs(
+    x = "Semana",
+    y = "Dia",
+    fill = "Nº de Episódios"
+  ) +
+  theme(axis.text.y = element_text(size = 13),
+        axis.text.x = element_text(size = 13)) 
+```
+
+Row
+-----------------------------------------------------------------------
+
+### Worldcloud de Séries Mais Vistas
+
+```{r, fig.width = 6,fig.height = 6}
+contagem_nuvem <- historico_serie %>%
+  count(titulo) %>%
+  arrange(desc(n)) %>%
+  top_n(200, n)
+wordcloud2(
+  data = contagem_nuvem, 
+  size = 0.7, 
+  shape = 'pentagon'
+)
+```
+
+Filmes {data-icon="fa-film"}
+=======================================================================
+
+Row
+-----------------------------------------------------------------------
+
+### Filmes
+
+```{r}
+total_filmes <- length(unique(historico_filme$titulo))
+valueBox(
+  total_filmes,
+  icon = 'fa-chart-line'
+)
+```
+
+### Dias
+
+```{r}
+total_dias <- length(unique(historico_filme$Date))
+valueBox(
+  total_dias,
+  icon = 'fa-calendar'
+)
+```
+
+
+Row 
+-----------------------------------------------------------------------
+
+### Frequência por Dia da Semana
+
+```{r}
+filme_dia_semana <- historico_filme %>%
+  count(dia_semana_nome)
+ggplot(filme_dia_semana, aes(dia_semana_nome, n)) +
+  geom_col(fill = "#0097d6") +
+  coord_polar() +
+  theme_minimal() +
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.text.x = element_text(size = 15)) 
+```
+
+### Frequência por Mês
+
+```{r}
+filme_mes <- historico_filme %>%
+  count(mes_nome)
+ggplot(filme_mes, aes(mes_nome, n)) +
+  geom_col(fill = "#0097d6") +
+  coord_polar()  +
+  theme_minimal() +
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.text.x = element_text(size = 15)) 
+```
