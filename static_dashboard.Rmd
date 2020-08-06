@@ -50,6 +50,12 @@ historico_filme$mes_nome <- months(historico_filme$Date, abbreviate = T)
 historico_filme$ano <- year(historico_filme$Date)
 ```
 
+
+Sidebar {data-width=280 .sidebar}
+=======================================================================
+
+Dashboard com dados de 2018 e 2019 do meu consumo do Netflix obtidos do site: https://www.netflix.com/viewingactivity
+
 Séries {data-icon="fa-television"}
 =======================================================================
 
