@@ -51,10 +51,21 @@ historico_filme$ano <- year(historico_filme$Date)
 ```
 
 
-Sidebar {data-width=280 .sidebar}
+Sidebar {data-width=360 .sidebar}
 =======================================================================
 
-Dashboard com dados de 2018 e 2019 do meu consumo do Netflix obtidos do site: https://www.netflix.com/viewingactivity
+### Info
+
+Este dashboard foi construído com o objetivo de estudo da ferramenta **Flexdashboard**. Foram utilizados dados de 2018 e 2019 do meu consumo do Netflix obtidos no site:
+
+- <sup>https://www.netflix.com/viewingactivity</sup>
+
+Outras fontes:
+
+- <sup>https://towardsdatascience.com/explore-your-activity-on-netflix-with-r-how-to-analyze-and-visualize-your-viewing-history-e85792410706</sup>
+- <sup>https://learn.datacamp.com/courses/building-dashboards-with-flexdashboard</sup>
+- <sup>https://rmarkdown.rstudio.com/flexdashboard/index.html</sup>
+
 
 Séries {data-icon="fa-television"}
 =======================================================================
@@ -95,7 +106,7 @@ valueBox(
 Row {data-height=300}
 -----------------------------------------------------------------------
 
-### Frequência por Dia da Semana
+### Consumo por Dia da Semana
 
 ```{r}
 episodio_dia_semana <- episodios_dia %>%
@@ -110,7 +121,7 @@ ggplot(episodio_dia_semana, aes(dia_semana_nome, n)) +
         axis.text.x = element_text(size = 15))
 ```
 
-### Frequência por Mês
+### Consumo por Mês
 
 ```{r}
 episodios_mes <- episodios_dia %>%
@@ -188,10 +199,10 @@ valueBox(
 ```
 
 
-Row 
+Row {data-height=450}
 -----------------------------------------------------------------------
 
-### Frequência por Dia da Semana
+### Consumo por Dia da Semana
 
 ```{r}
 filme_dia_semana <- historico_filme %>%
@@ -206,7 +217,7 @@ ggplot(filme_dia_semana, aes(dia_semana_nome, n)) +
         axis.text.x = element_text(size = 15)) 
 ```
 
-### Frequência por Mês
+### Consumo por Mês
 
 ```{r}
 filme_mes <- historico_filme %>%
