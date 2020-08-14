@@ -17,7 +17,8 @@ library(lubridate)
 library(zoo)
 library(ggplot2)
 library(plotly)
-library(wordcloud2)
+library(wordcloud)
+#library(wordcloud2)
 library(forcats)
 library(knitr)
 
@@ -67,7 +68,7 @@ Outras fontes:
 - <sup>https://rmarkdown.rstudio.com/flexdashboard/index.html</sup>
 
 
-Séries {data-icon="fa-television"}
+Dashboard {data-navmenu=Séries}
 =======================================================================
 
 Row {data-height=130}
@@ -100,6 +101,15 @@ total_dias <- length(unique(historico_serie$Date))
 valueBox(
   total_dias,
   icon = 'fa-calendar'
+)
+```
+
+### Episódios/Dia
+
+```{r}
+valueBox(
+  round(total_eps/(365*length(unique(year(historico$Date)))), digits = 2), 
+  icon = 'fa-bar-chart'
 )
 ```
 
@@ -155,6 +165,10 @@ ggplot(episodios_dia, aes(semana_mes, dia_semana_nome, fill = episodios_dia$n)) 
         axis.text.x = element_text(size = 13)) 
 ```
 
+
+Worldcloud {data-navmenu=Séries}
+=======================================================================
+
 Row
 -----------------------------------------------------------------------
 
@@ -165,11 +179,16 @@ contagem_nuvem <- historico_serie %>%
   count(titulo) %>%
   arrange(desc(n)) %>%
   top_n(200, n)
-wordcloud2(
-  data = contagem_nuvem, 
-  size = 0.7, 
-  shape = 'pentagon'
-)
+# wordcloud2(
+#   data = contagem_nuvem, 
+#   size = 0.7, 
+#   shape = 'pentagon'
+# )
+wordcloud(
+  words = contagem_nuvem$titulo, 
+  freq = contagem_nuvem$n,
+  rot.per=0.35, 
+  colors=brewer.pal(8, "Dark2"))
 ```
 
 Filmes {data-icon="fa-film"}
@@ -198,6 +217,14 @@ valueBox(
 )
 ```
 
+### Filmes/Dia
+
+```{r}
+valueBox(
+  round(total_filmes/(365*length(unique(year(historico$Date)))), digits = 2), 
+  icon = 'fa-bar-chart'
+)
+```
 
 Row {data-height=450}
 -----------------------------------------------------------------------
