@@ -149,9 +149,30 @@ ggplot(episodios_mes, aes(mes_nome, n)) +
 Row {data-height=400}
 -----------------------------------------------------------------------
 
-### Heatmap
+### Progressão
 
 ```{r, fig.width = 15,fig.height = 4}
+progressao_serie <- episodios_dia %>%
+  group_by(ano_mes) %>%
+  count()
+
+ggplot(progressao_serie, aes(x = as.factor(ano_mes), y = n, group = 1)) +
+  geom_line() +
+  labs(
+    x = "Mês-Ano",
+    y = "Episódios"
+  ) +
+  theme(axis.text.y = element_text(size = 13),
+        axis.text.x = element_text(size = 11)) 
+
+```
+
+Row {data-height=400}
+-----------------------------------------------------------------------
+
+### Heatmap
+
+```{r, fig.width = 15,fig.height = 5}
 ggplot(episodios_dia, aes(semana_mes, dia_semana_nome, fill = episodios_dia$n)) + 
   geom_tile(colour = "white") + 
   facet_grid(year(episodios_dia$Date) ~ mes_nome) + 
@@ -257,4 +278,26 @@ ggplot(filme_mes, aes(mes_nome, n)) +
         axis.title.y = element_blank(),
         axis.text.y = element_blank(),
         axis.text.x = element_text(size = 15)) 
+```
+
+Row {data-height=400}
+-----------------------------------------------------------------------
+
+### Progressão
+
+```{r, fig.width = 15,fig.height = 4}
+historico_filme$ano_mes <- factor(as.yearmon(historico_filme$Date)) 
+progressao_filme <- historico_filme %>%
+  group_by(ano_mes) %>%
+  count()
+
+ggplot(progressao_filme, aes(x = as.factor(ano_mes), y = as.factor(n), group = 1)) +
+  geom_line() +
+  labs(
+    x = "Mês-Ano",
+    y = "Episódios"
+  ) +
+  theme(axis.text.y = element_text(size = 13),
+        axis.text.x = element_text(size = 11)) 
+
 ```
