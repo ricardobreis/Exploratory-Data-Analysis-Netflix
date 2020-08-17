@@ -247,7 +247,7 @@ valueBox(
 )
 ```
 
-Row {data-height=450}
+Row {data-height=300}
 -----------------------------------------------------------------------
 
 ### Consumo por Dia da Semana
