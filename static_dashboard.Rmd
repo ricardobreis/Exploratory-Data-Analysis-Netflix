@@ -52,20 +52,20 @@ historico_filme$ano <- year(historico_filme$Date)
 ```
 
 
-Sidebar {data-width=360 .sidebar}
+Sidebar {data-width=300 .sidebar}
 =======================================================================
 
 ### Info
 
 Este dashboard foi construído com o objetivo de estudo da ferramenta **Flexdashboard**. Foram utilizados dados de 2018 e 2019 do meu consumo do Netflix obtidos no site:
 
-- <sup>https://www.netflix.com/viewingactivity</sup>
+- [link](https://www.netflix.com/viewingactivity)
 
 Outras fontes:
 
-- <sup>https://towardsdatascience.com/explore-your-activity-on-netflix-with-r-how-to-analyze-and-visualize-your-viewing-history-e85792410706</sup>
-- <sup>https://learn.datacamp.com/courses/building-dashboards-with-flexdashboard</sup>
-- <sup>https://rmarkdown.rstudio.com/flexdashboard/index.html</sup>
+- [link](https://towardsdatascience.com/explore-your-activity-on-netflix-with-r-how-to-analyze-and-visualize-your-viewing-history-e85792410706)
+- [link](https://learn.datacamp.com/courses/building-dashboards-with-flexdashboard)
+- [link](https://rmarkdown.rstudio.com/flexdashboard/index.html)
 
 
 Dashboard {data-navmenu=Séries}
@@ -136,6 +136,7 @@ ggplot(episodio_dia_semana, aes(dia_semana_nome, n)) +
 ```{r}
 episodios_mes <- episodios_dia %>%
   count(mes_nome)
+
 ggplot(episodios_mes, aes(mes_nome, n)) +
   geom_col(fill = "#0097d6") +
   coord_polar()  +
@@ -144,6 +145,7 @@ ggplot(episodios_mes, aes(mes_nome, n)) +
         axis.title.y = element_blank(),
         axis.text.y = element_blank(),
         axis.text.x = element_text(size = 15)) 
+
 ```
 
 Row {data-height=400}
@@ -156,23 +158,26 @@ progressao_serie <- episodios_dia %>%
   group_by(ano_mes) %>%
   count()
 
-ggplot(progressao_serie, aes(x = as.factor(ano_mes), y = n, group = 1)) +
+plot_progressao <- ggplot(progressao_serie, aes(x = as.factor(ano_mes), y = n, group = 1)) +
   geom_line() +
   labs(
     x = "Mês-Ano",
     y = "Episódios"
   ) +
-  theme(axis.text.y = element_text(size = 13),
-        axis.text.x = element_text(size = 11)) 
+  theme(axis.text.y = element_text(size = 9),
+        axis.text.x = element_text(size = 6)) 
+
+ggplotly(plot_progressao)
 
 ```
 
-Row {data-height=400}
+Row {data-height=350}
 -----------------------------------------------------------------------
 
 ### Heatmap
 
-```{r, fig.width = 15,fig.height = 5}
+```{r, fig.width = 10,fig.height = 3}
+
 ggplot(episodios_dia, aes(semana_mes, dia_semana_nome, fill = episodios_dia$n)) + 
   geom_tile(colour = "white") + 
   facet_grid(year(episodios_dia$Date) ~ mes_nome) + 
@@ -180,10 +185,12 @@ ggplot(episodios_dia, aes(semana_mes, dia_semana_nome, fill = episodios_dia$n)) 
   labs(
     x = "Semana",
     y = "Dia",
-    fill = "Nº de Episódios"
+    fill = "Episódios"
   ) +
-  theme(axis.text.y = element_text(size = 13),
-        axis.text.x = element_text(size = 13)) 
+  theme(axis.text.y = element_text(size = 6),
+        axis.text.x = element_text(size = 8),
+        legend.title = element_text(size = 8)) 
+
 ```
 
 
@@ -286,18 +293,22 @@ Row {data-height=400}
 ### Progressão
 
 ```{r, fig.width = 15,fig.height = 4}
+
 historico_filme$ano_mes <- factor(as.yearmon(historico_filme$Date)) 
+
 progressao_filme <- historico_filme %>%
   group_by(ano_mes) %>%
   count()
 
-ggplot(progressao_filme, aes(x = as.factor(ano_mes), y = as.factor(n), group = 1)) +
+plot_progressao_filme <- ggplot(progressao_filme, aes(x = as.factor(ano_mes), y = as.factor(n), group = 1)) +
   geom_line() +
   labs(
     x = "Mês-Ano",
     y = "Episódios"
   ) +
-  theme(axis.text.y = element_text(size = 13),
-        axis.text.x = element_text(size = 11)) 
+  theme(axis.text.y = element_text(size = 9),
+        axis.text.x = element_text(size = 6)) 
+
+ggplotly(plot_progressao_filme)
 
 ```
