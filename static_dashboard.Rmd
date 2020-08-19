@@ -21,6 +21,7 @@ library(wordcloud)
 #library(wordcloud2)
 library(forcats)
 library(knitr)
+library(DT)
 
 historico <- read.csv("~/R-Projetos/Netflix/NetflixViewingHistory.csv", encoding="UTF-8")
 historico$Date <- dmy(historico$Date)
@@ -148,17 +149,17 @@ ggplot(episodios_mes, aes(mes_nome, n)) +
 
 ```
 
-Row {data-height=400}
+Row {data-height=400 .tabset}
 -----------------------------------------------------------------------
 
-### Progressão
+### Progressão por Mês
 
 ```{r, fig.width = 15,fig.height = 4}
 progressao_serie <- episodios_dia %>%
   group_by(ano_mes) %>%
   count()
 
-plot_progressao <- ggplot(progressao_serie, aes(x = as.factor(ano_mes), y = n, group = 1)) +
+plot_progressao_mes <- ggplot(progressao_serie, aes(x = as.factor(ano_mes), y = n, group = 1)) +
   geom_line() +
   labs(
     x = "Mês-Ano",
@@ -167,7 +168,22 @@ plot_progressao <- ggplot(progressao_serie, aes(x = as.factor(ano_mes), y = n, g
   theme(axis.text.y = element_text(size = 9),
         axis.text.x = element_text(size = 6)) 
 
-ggplotly(plot_progressao)
+ggplotly(plot_progressao_mes)
+
+```
+
+### Progressão por Dia
+
+```{r, fig.width = 15,fig.height = 4}
+
+plot_progressao_dia <- ggplot(episodios_dia, aes(x = Date, y = n)) +
+  geom_col(color = c("#0097d6")) +
+  labs(
+    x = "Data",
+    y = "Episódios"
+  )
+
+ggplotly(plot_progressao_dia)
 
 ```
 
@@ -219,7 +235,7 @@ wordcloud(
   colors=brewer.pal(8, "Dark2"))
 ```
 
-Filmes {data-icon="fa-film"}
+Filmes 
 =======================================================================
 
 Row
@@ -287,20 +303,20 @@ ggplot(filme_mes, aes(mes_nome, n)) +
         axis.text.x = element_text(size = 15)) 
 ```
 
-Row {data-height=400}
+Row {data-height=400 .tabset}
 -----------------------------------------------------------------------
 
-### Progressão
+### Progressão por Mês
 
 ```{r, fig.width = 15,fig.height = 4}
 
 historico_filme$ano_mes <- factor(as.yearmon(historico_filme$Date)) 
 
-progressao_filme <- historico_filme %>%
+progressao_filme_mes <- historico_filme %>%
   group_by(ano_mes) %>%
   count()
 
-plot_progressao_filme <- ggplot(progressao_filme, aes(x = as.factor(ano_mes), y = as.factor(n), group = 1)) +
+plot_progressao_filme_mes <- ggplot(progressao_filme_mes, aes(x = as.factor(ano_mes), y = as.factor(n), group = 1)) +
   geom_line() +
   labs(
     x = "Mês-Ano",
@@ -309,6 +325,25 @@ plot_progressao_filme <- ggplot(progressao_filme, aes(x = as.factor(ano_mes), y 
   theme(axis.text.y = element_text(size = 9),
         axis.text.x = element_text(size = 6)) 
 
-ggplotly(plot_progressao_filme)
+ggplotly(plot_progressao_filme_mes)
+
+```
+
+### Progressão por Dia
+
+```{r, fig.width = 15,fig.height = 4}
+
+progressao_filme_dia <- historico_filme %>%
+  group_by(Date) %>%
+  count()
+
+plot_progressao_dia <- ggplot(progressao_filme_dia, aes(x = Date, y = n)) +
+  geom_col(color = c("#0097d6")) +
+  labs(
+    x = "Data",
+    y = "Filme"
+  )
+
+ggplotly(plot_progressao_dia)
 
 ```
