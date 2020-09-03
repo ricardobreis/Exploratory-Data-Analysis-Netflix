@@ -68,6 +68,16 @@ Outras fontes:
 - [link](https://learn.datacamp.com/courses/building-dashboards-with-flexdashboard)
 - [link](https://rmarkdown.rstudio.com/flexdashboard/index.html)
 
+### Versão: v1.1
+
+Melhorias na última release:
+
+- [link](https://rmarkdown.rstudio.com/flexdashboard/index.html)
+
+Próxima versão:
+
+- Adicionar interatividade com **Shiny**
+
 
 Dashboard {data-navmenu=Séries}
 =======================================================================
