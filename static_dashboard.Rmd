@@ -72,7 +72,7 @@ Outras fontes:
 
 Melhorias na última release:
 
-- [link](https://rmarkdown.rstudio.com/flexdashboard/index.html)
+- [link](https://github.com/ricardobreis/Exploratory-Data-Analysis-Netflix/releases/tag/v1.1.0)
 
 Próxima versão:
 
